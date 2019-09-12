@@ -30,29 +30,13 @@ void SMSdecode(uint8_t numberIndex, char * newSMS) {
   }
 
 switch (chkSMSindex) {
-    case 1:
-    /*char * nextLine;
-      nextLine = strchr(newSMS + 10, '\r');
-      Serial.println(nextLine);
-      uint8_t SMStoRead = atoi(strstr(nextLine, "Read SMS:") + 9);
-      char * newSMS2 = SIM800.readSMS(SMStoRead);
-      //char SMStoSend2[161];
-      nextLine = strchr(newSMS2 + 10, '\r');
-      //Serial.println(nextLine);
-      //char * SMStextEnd;
-      //SMStextEnd = strchr(nextLine + 1, '\r');
-      //Serial.println(SMStextEnd);
-      //strncpy(SMStoSend2, nextLine + 1, 160);
-      //SMStoSend2[161] = '\0';
-      Serial.println(nextLine + 1);
-      SIM800.sendSMS(senderNumber, nextLine + 1);
-      SIM800.delSMS(SMStoRead);
-      break;*/
-    case 2:
+    case 1:         //send sms from memory
+      break;
+    case 2:         //set alarm to detection mode
       changeAlarmMode(detectionmode);
       sendSMSanswer(senderNumber, chkSMSindex);
       break;
-    case 3:
+    case 3:         //set alarm to standby mode
       changeAlarmMode(standbymode);
       digitalWrite(outsounderPin, HIGH);
       digitalWrite(insounderPin, LOW);
@@ -61,21 +45,10 @@ switch (chkSMSindex) {
       }
       sendSMSanswer(senderNumber, chkSMSindex);
       break;
-    case 4:
-      alarmBasementSet(1);
-      sendSMSanswer(senderNumber, chkSMSindex);
-      break;
-    case 5:
-      alarmBasementSet(0);
-      sendSMSanswer(senderNumber, chkSMSindex);
-      break;
-    case 6:
+
+    case 6:         //send sms with temperatures
       char smsToSendT[54];
       char t[6];
-
-
-
-
       strcpy_P(smsToSendT, PGM_GETSTR(SMSansw, chkSMSindex));
       dtostrf(tempsalon, 3, 1, t);
       for (int i = 0; i < 4; i++) {
@@ -105,101 +78,29 @@ switch (chkSMSindex) {
       Serial.println(smsToSendT);
       SIM800.sendSMS(senderNumber, smsToSendT);
       break;
-    case 7:
+    case 7:         //light on
       digitalWrite(salonlightPin, HIGH);
       sendSMSanswer(senderNumber, chkSMSindex);
       autolight = 0;
       break;
-    case 8:
+    case 8:         //light off
       digitalWrite(salonlightPin, LOW);
       autolight = 0;
       sendSMSanswer(senderNumber, chkSMSindex);
       break;
-    case 9:
+    case 9:         //light auto
       autolight = 2;
       sendSMSanswer(senderNumber, chkSMSindex);
       break;
-    case 10:
-      avsup = true;
-      sendSMSanswer(senderNumber, chkSMSindex);
-      break;
-    case 11:
-      avsup = false;
-      sendSMSanswer(senderNumber, chkSMSindex);
-      break;
-    case 12:
+
+    case 12:        //send command to external controller
       digitalWrite(LeonardoPowerPin, LOW);
       delay(2000);
       Leonardo.print(F("R"));
       sendSMSanswer(senderNumber, chkSMSindex);
       break;
-    case 13:
-      Leonardo.print(F("r"));
-      sendSMSanswer(senderNumber, chkSMSindex);
-      break;
-    case 14:
-      digitalWrite(LeonardoPowerPin, LOW);
-      avsup = false;
-      sendSMSanswer(senderNumber, chkSMSindex);
-      break;
+
     case 15:
-      heatmodechange(heatingday);
-      autoheatmodebool = false;
-      EEPROM.update(autoheatmodemem, autoheatmodebool);
-      sendSMSanswer(senderNumber, chkSMSindex);
-      break;
-    case 16:
-      heatmodechange(heatingnight);
-      autoheatmodebool = false;
-      EEPROM.update(autoheatmodemem, autoheatmodebool);
-      sendSMSanswer(senderNumber, chkSMSindex);
-      break;
-    case 17:
-      heatmodechange(heatingout);
-      autoheatmodebool = false;
-      EEPROM.update(autoheatmodemem, autoheatmodebool);
-      sendSMSanswer(senderNumber, chkSMSindex);
-      break;
-    case 18:
-      heatmodechange(heatingoff);
-      autoheatmodebool = false;
-      EEPROM.update(autoheatmodemem, autoheatmodebool);
-      sendSMSanswer(senderNumber, chkSMSindex);
-      break;
-    case 19:
-      autoheatmodebool = true;
-      EEPROM.update(autoheatmodemem, autoheatmodebool);
-      sendSMSanswer(senderNumber, chkSMSindex);
-      break;
-    case 20:
-      unsigned long IRCode;
-      IRCode = pgm_read_word_near(IRCodes);
-      irsend.sendNEC(IRCode, 32);
-      sendSMSanswer(senderNumber, chkSMSindex);
-      break;
-    case 21:
-      unsigned long IRCode2;
-      IRCode2 = pgm_read_word_near(IRCodes+1);
-      irsend.sendNEC(IRCode2, 32);
-      sendSMSanswer(senderNumber, chkSMSindex);
-      break;
-    case 22:
-      SIM800.delAllSMS();
-      delay(1000);
-      break;
-    case 23:
-      char smsToSend2[20];
-      char am[2];
-      strcpy_P(smsToSend2, PGM_GETSTR(SMSansw, chkSMSindex));
-      sprintf(am, "%i", alarmmode);
-      strcat(smsToSend2, am);
-      /*smsToSend2[10] = am[0];
-      smsToSend2[11] = am[1];
-      smsToSend2[12]='\0';*/
-      
-      SIM800.sendSMS(senderNumber, smsToSend2);
-      break;
-    case 24:
       unsigned long current;
       current = millis();
       unsigned long lastMoveDelta;
@@ -221,12 +122,28 @@ switch (chkSMSindex) {
       if (z[1] != '\0')smsToSend3[15] = z[1];
       SIM800.sendSMS(senderNumber, smsToSend3);
       break;
-    
+
+
+
+    case 22:
+      SIM800.delAllSMS();
+      delay(1000);
+      break;
+    case 23:
+      char smsToSend2[20];
+      char am[2];
+      strcpy_P(smsToSend2, PGM_GETSTR(SMSansw, chkSMSindex));
+      sprintf(am, "%i", alarmmode);
+      strcat(smsToSend2, am);
+      SIM800.sendSMS(senderNumber, smsToSend2);
+      break;
+
+
     default:
       SIM800.sendSMS(senderNumber, smsToSendT);
       break;
 
 
   }
-  
+
 }
